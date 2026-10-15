@@ -82,7 +82,7 @@ function NewIdea() {
 
   useEffect(() => {
     if (step !== 4) return;
-    const t = setInterval(() => setBuildStep((s) => Math.min(s + 1, BUILD_STEPS.length - 1)), 4500);
+    const t = setInterval(() => setBuildStep((s) => Math.min(s + 1, BUILD_STEPS.length - 1)), 15000);
     return () => clearInterval(t);
   }, [step]);
 
@@ -285,7 +285,7 @@ function NewIdea() {
         <section className="py-10 text-center">
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-indigo-600 text-3xl text-white fp-pulse">⟡</div>
           <h1 className="mt-6 text-2xl font-semibold">Building your Launch Kit</h1>
-          <p className="mt-1 text-sm text-stone-500">This usually takes 30–60 seconds.</p>
+          <p className="mt-1 text-sm text-stone-500">This can take 1–3 minutes. Good plans take a moment.</p>
           <ul className="mx-auto mt-8 max-w-sm space-y-2.5 text-left text-sm">
             {BUILD_STEPS.map((s, i) => (
               <li key={s} className={`flex items-center gap-3 ${i > buildStep ? "text-stone-400" : "text-stone-800"}`}>

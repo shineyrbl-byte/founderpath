@@ -14,6 +14,9 @@ export function errorResponse(err: unknown) {
     if (err.status === 429) {
       message = "The free AI quota is used up for now. Please wait a minute and try again.";
       status = 429;
+    } else if (err.status === 503 || err.status === 500) {
+      message = "Google's AI is very busy right now. Please try again in a minute.";
+      status = 503;
     } else if (err.status === 400 || err.status === 401 || err.status === 403) {
       message = "The server's Gemini API key is invalid or missing.";
     } else {
