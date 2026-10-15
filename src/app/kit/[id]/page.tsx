@@ -393,7 +393,7 @@ function KitPage() {
     <div className="mx-auto max-w-6xl px-5 py-8">
       {data.demo && (
         <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
-          Demo mode: this kit was generated from templates. Add an <code>ANTHROPIC_API_KEY</code> to get a fully personalised plan.
+          Demo mode: this kit was generated from templates. Add a free <code>GEMINI_API_KEY</code> (or an <code>ANTHROPIC_API_KEY</code>) to get a fully personalised plan.
         </div>
       )}
       <div className="flex flex-wrap items-start gap-6">

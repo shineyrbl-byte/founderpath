@@ -213,8 +213,8 @@ export function demoKit(idea: string, profile: Profile): Kit {
 export function demoReply(kit: Kit, question: string): string {
   const q = question.toLowerCase();
   if (q.includes("price") || q.includes("money") || q.includes("charge"))
-    return `**Pricing idea:** ${kit.businessModel.pricing}\n\n- Start by asking your 5 most active users if they'd pre-pay.\n- Don't build payments yet: use a Stripe payment link.\n\n_(Demo mode: add an Anthropic API key for tailored answers.)_`;
+    return `**Pricing idea:** ${kit.businessModel.pricing}\n\n- Start by asking your 5 most active users if they'd pre-pay.\n- Don't build payments yet: use a Stripe payment link.\n\n_(Demo mode: add an AI API key for tailored answers.)_`;
   if (q.includes("start") || q.includes("first") || q.includes("next"))
-    return `**Your next step:** ${kit.roadmap[0].tasks[0].title}.\n\n${kit.roadmap[0].tasks[0].detail}\n\nThen run 5 interviews using the script in the **Validate** tab.\n\n_(Demo mode: add an Anthropic API key for tailored answers.)_`;
-  return `Good question. Based on your Launch Kit, focus on your riskiest assumption first:\n\n> ${kit.validation.riskiestAssumption}\n\n- Run the experiment: ${kit.validation.experiment}\n- Go signal: ${kit.validation.goSignal}\n\n_(Demo mode: add an Anthropic API key for tailored answers.)_`;
+    return `**Your next step:** ${kit.roadmap[0].tasks[0].title}.\n\n${kit.roadmap[0].tasks[0].detail}\n\nThen run 5 interviews using the script in the **Validate** tab.\n\n_(Demo mode: add an AI API key for tailored answers.)_`;
+  return `Good question. Based on your Launch Kit, focus on your riskiest assumption first:\n\n> ${kit.validation.riskiestAssumption}\n\n- Run the experiment: ${kit.validation.experiment}\n- Go signal: ${kit.validation.goSignal}\n\n_(Demo mode: add an AI API key for tailored answers.)_`;
 }
