@@ -1,10 +1,11 @@
 import { Fragment, type ReactNode } from "react";
 
-// Minimal renderer for the co-founder chat: **bold**, _italic_, bullets, numbered lists, > quotes.
+// Minimal renderer for the co-founder chat: **bold**, _italic_ / *italic*, bullets, numbered lists, > quotes.
 function inline(text: string): ReactNode[] {
-  return text.split(/(\*\*[^*]+\*\*|_[^_]+_|`[^`]+`)/g).map((part, i) => {
+  return text.split(/(\*\*[^*]+\*\*|\*[^*\s][^*]*\*|_[^_]+_|`[^`]+`)/g).map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) return <strong key={i}>{part.slice(2, -2)}</strong>;
-    if (part.startsWith("_") && part.endsWith("_") && part.length > 2) return <em key={i}>{part.slice(1, -1)}</em>;
+    if ((part.startsWith("_") && part.endsWith("_")) || (part.startsWith("*") && part.endsWith("*") && part.length > 2))
+      return <em key={i}>{part.slice(1, -1)}</em>;
     if (part.startsWith("`") && part.endsWith("`")) return <code key={i} className="rounded bg-stone-100 px-1">{part.slice(1, -1)}</code>;
     return <Fragment key={i}>{part}</Fragment>;
   });
