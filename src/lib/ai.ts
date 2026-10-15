@@ -4,14 +4,26 @@ import type { z } from "zod";
 import { KitSchema, QuestionsSchema, type Kit, type Profile, type Questions } from "./schema";
 import { demoKit, demoQuestions, demoReply } from "./demo";
 import type { ChatMessage } from "./db";
+import { geminiChat, geminiStructured } from "./gemini";
 
 const MODEL = "claude-opus-5-5";
 // If Opus declines a request, the API transparently retries on a fallback model.
 const FALLBACK = { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const };
 
+export type Provider = "claude" | "gemini" | "demo";
+
+// AI_PROVIDER picks explicitly; otherwise use whichever key is configured.
 // No credentials -> demo mode, so the app still runs end to end for judges without a key.
-export const isDemoMode = () =>
-  process.env.FOUNDERPATH_DEMO === "1" || !(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
+export function provider(): Provider {
+  const env = process.env;
+  if (env.FOUNDERPATH_DEMO === "1") return "demo";
+  const hasClaude = Boolean(env.ANTHROPIC_API_KEY || env.ANTHROPIC_AUTH_TOKEN);
+  const hasGemini = Boolean(env.GEMINI_API_KEY);
+  if (env.AI_PROVIDER === "claude" && hasClaude) return "claude";
+  if (env.AI_PROVIDER === "gemini" && hasGemini) return "gemini";
+  return hasClaude ? "claude" : hasGemini ? "gemini" : "demo";
+}
+export const isDemoMode = () => provider() === "demo";
 
 let client: Anthropic | null = null;
 const getClient = () => (client ??= new Anthropic());
@@ -46,6 +58,7 @@ const COFOUNDER_PERSONA = `You are FounderPath, an experienced startup co-founde
 You are candid: point out weak spots and risks plainly, but stay encouraging and always give a concrete next step. Everything you recommend must be doable by this specific founder with their skill, time and budget. Prefer real, named tools and real competitors over generic advice. Write in plain language a high-school student would understand.`;
 
 async function parse<T extends z.ZodType>(schema: T, system: string, user: string, effort: "low" | "medium") {
+  if (provider() === "gemini") return geminiStructured(schema, system, user);
   const res = await getClient().beta.messages.parse({
     model: MODEL,
     max_tokens: 16000,
@@ -127,6 +140,13 @@ export async function* chatStream(
     }
     return;
   }
+  const chatInstructions = `${kitDigest(idea, profile, kit, done)}
+
+You are now chatting with this founder about their plan. Answer in under 200 words unless they ask for a longer artifact (an email, a script, a landing-page copy). Use short markdown: bullet points and **bold** only.`;
+  if (provider() === "gemini") {
+    yield* geminiChat(`${COFOUNDER_PERSONA}\n\n${chatInstructions}`, history);
+    return;
+  }
   const stream = getClient().beta.messages.stream({
     model: MODEL,
     max_tokens: 8000,
@@ -135,13 +155,7 @@ export async function* chatStream(
     // The kit is stable across a conversation, so cache it as part of the system prefix.
     system: [
       { type: "text", text: COFOUNDER_PERSONA },
-      {
-        type: "text",
-        text: `${kitDigest(idea, profile, kit, done)}
-
-You are now chatting with this founder about their plan. Answer in under 200 words unless they ask for a longer artifact (an email, a script, a landing-page copy). Use short markdown: bullet points and **bold** only.`,
-        cache_control: { type: "ephemeral" },
-      },
+      { type: "text", text: chatInstructions, cache_control: { type: "ephemeral" } },
     ],
     messages: history.map((m) => ({ role: m.role, content: m.content })),
   });
